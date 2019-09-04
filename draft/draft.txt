@@ -1,0 +1,62 @@
+handleXXX
+{
+    connectToServer();
+    sendRequest();
+    processResponse();
+
+    doSomething();
+}
+
+handleXXX
+{
+    int fd = CreateTcpSocket();
+    int ret = connect(fd, "xx.xx.xx.xx", 3456);
+
+    CoroutineIoAdd(fd);
+    CoroutineTimerAdd(fd, 5000, handleTimeout);
+    CoroutineIoWait(fd);
+
+    if (isTimeout)
+    {
+        return;
+    }
+
+    data = "xxx";
+    len = 3;
+
+    int nbytes = 0;
+    while (nbytes != len)
+    {
+        int ret =  write(fd, data + nbytes, len - nbytes);
+        if (ret < 0)
+        {
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+            {
+                CoroutineTimerAdd(fd, 10000, handleTimeout);
+                CoroutineIoAdd(fd);
+                CoroutineIoWait(fd);
+
+                if (isTimeout)
+                {
+                    return;
+                }
+            }
+            return;
+        }
+
+        nbytes += ret;
+    }
+
+    string read_buffer = "";
+
+    while (n != expect_bytes)
+    {
+        uint8_t in[1024];
+
+        ret = read(fd, in, sizeof(in));
+
+        if (ret < 0)
+        {
+        }
+    }
+}
