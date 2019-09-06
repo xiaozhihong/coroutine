@@ -1,0 +1,2 @@
+AsmStoreRgister:
+	ret
