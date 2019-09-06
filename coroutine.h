@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef void*(RoutineFunc)(void*);
+typedef void(RoutineFunc)(void*);
 
 struct CoroutineContext
 {
@@ -18,7 +18,7 @@ struct CoroutineContext
 };
 
 int CoroutineEntry();
-int CoroutineCreate(RoutineFunc routine_func);
+CoroutineContext* CoroutineCreate(RoutineFunc routine_func);
 int Yiled(CoroutineContext* ctx);
 int Resume(CoroutineContext* ctx);
 int Swap(CoroutineContext* pre, CoroutineContext* cur);

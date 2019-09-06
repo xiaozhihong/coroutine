@@ -9,8 +9,8 @@ CFLAGS         = -g -Wno-deprecated -W -O2 -D__STDC_LIMIT_MACROS
 CXXFLAGS       = -g -std=c++0x -O2
 # ==========================================================
 SOURCES += $(wildcard ./*.cpp)
-SOURCES += ctx.S
-OBJECTS += $(patsubst %.cpp,%.o, $(patsubst %.c,%.o, $(SOURCES)))
+SOURCES += $(wildcard ./*.S)
+OBJECTS += $(patsubst %.cpp,%.o, $(patsubst %.c,%.o, $(patsubst %.S,%.o, $(SOURCES))))
 # ==========================================================
 ALL_OBJECTS = $(OBJECTS)
 # ==========================================================
@@ -37,6 +37,9 @@ all: $(TARGET)
     $(CC) $(INCLUDE_DIR) $(CFLAGS)  -MM $< | sed '1s/.*.://' >> $@;
 
 %.o: %.c
+	$(CC) $(INCLUDE_DIR) $(CFLAGS) -o $@ -c $<
+
+%.o: %.S
 	$(CC) $(INCLUDE_DIR) $(CFLAGS) -o $@ -c $<
 
 $(TARGET): $(OBJECTS)
