@@ -78,7 +78,7 @@ void Swap(CoroutineContext* pre, CoroutineContext* cur)
 
 void Yield(CoroutineContext* ctx)
 {
-    Swap(get_thread_schedule_ctx(), ctx);
+    Swap(ctx, get_thread_schedule_ctx());
 }
 
 void Resume(CoroutineContext* ctx)
@@ -91,6 +91,6 @@ void Resume(CoroutineContext* ctx)
     }
     else
     {
-        Swap(ctx, get_thread_schedule_ctx());
+        Swap(get_thread_schedule_ctx(), ctx);
     }
 }
