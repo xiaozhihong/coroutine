@@ -35,10 +35,13 @@ static void print_ctx_stack(CoroutineContext* ctx)
 {
     cout << "ctx:" << ctx << endl;
     cout << "stack:" << endl;
-    uint64_t* p = (uint64_t*)ctx->stack_;
-    for (int i = 0; i != 8; ++i)
+    if (ctx != NULL)
     {
-        cout << "[" << i << "] " << hex << *p++ << endl;
+        uint64_t* p = (uint64_t*)ctx->stack_;
+        for (int i = 0; i != 8; ++i)
+        {
+            cout << "[" << i << "] " << hex << *p++ << endl;
+        }
     }
 }
 
