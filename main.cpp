@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -31,20 +32,6 @@ struct UserParam
     double d;
 };
 
-static void print_ctx_stack(CoroutineContext* ctx)
-{
-    cout << "ctx:" << ctx << endl;
-    cout << "stack:" << endl;
-    if (ctx != NULL)
-    {
-        uint64_t* p = (uint64_t*)ctx->stack_;
-        for (int i = 0; i != 8; ++i)
-        {
-            cout << "[" << i << "] " << hex << *p++ << endl;
-        }
-    }
-}
-
 void routine(void* args)
 {
     cout << __func__ << ", args:" << args << endl;
@@ -54,14 +41,17 @@ void routine(void* args)
 
     CoroutineContext* ctx = get_cur_ctx();
     Yield(ctx);
-
-    print_ctx_stack(ctx);
 }
 
 int main(int argc, char* argv[], char* env[])
 {
     UserParam* param = new UserParam();
     CoroutineContext* ctx = CoroutineCreate(routine, param);
+
+    cout << __func__ << ":" << "func addr:" << "\n"
+         << "    main:" << (void*)main
+         << "    routine:" << (void*)routine
+         << endl;
 
     //ctx->StoreRegister();
     cout << __func__ << ":" << __LINE__ << endl;

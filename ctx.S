@@ -3,14 +3,16 @@
 .type  AsmStoreRegister, @function
 
 AsmStoreRegister:
-	movq (%rdi), %rbx
-	movq %rbp, (%rbx)
-	movq %rsp, 8(%rbx)
-	movq %rax, 16(%rbx)
-	movq %rcx, 24(%rbx)
-	movq %rdx, 32(%rbx)
-	movq %rsi, 40(%rbx)
-	movq $0x12ABCD, 48(%rbx)
+	movq (%rdi)    , %rbx
+	movq %rbp      , 8(%rbx)
+	movq %rsp      , 16(%rbx)
+	movq %rax      , 24(%rbx)
+	movq %rcx      , 32(%rbx)
+	movq %rdx      , 40(%rbx)
+	movq %rsi      , 48(%rbx)
+	movq (%rsp)    , %rcx
+	movq %rcx      , 56(%rbx)
+	movq $0x12ABCD , 64(%rbx)
 	ret
 
 // ==============================================================================
@@ -19,6 +21,14 @@ AsmStoreRegister:
 .type AsmLoadRegister, @function
 
 AsmLoadRegister:
+	movq  (%rdi)    , %rbx
+	movq  8(%rbx)   , %rbp
+	movq  16(%rbx)  , %rsp
+	movq  24(%rbx)  , %rax
+	movq  32(%rbx)  , %rcx
+	movq  40(%rbx)  , %rdx
+	movq  48(%rbx)  , %rsi
+	pushq 56(%rbx)
 	ret
 
 // ==============================================================================

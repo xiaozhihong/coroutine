@@ -7,17 +7,15 @@ typedef void(RoutineFunc)(void*);
 
 struct CoroutineContext
 {
-    CoroutineContext(RoutineFunc routine_func, void* args, const int& stack_size);
+    CoroutineContext(RoutineFunc routine_func, void* args, const uint32_t& stack_size);
     ~CoroutineContext();
-
-    void AllocStack();
 
     void StoreRegister();
     void LoadRegister();
 
     uint8_t* stack_; // bottom of the stack
     void* args_;
-    int stack_size_;
+    uint32_t stack_size_;
     RoutineFunc* routine_func_;
 };
 
