@@ -37,7 +37,18 @@ void routine(void* args)
     cout << __func__ << ", args:" << args << endl;
 
     UserParam* param = (UserParam*)args;
-    cout << param->print() << endl;
+    //cout << param->print() << endl;
+    char ch[8];
+    ch[0] = 'x';
+    ch[1] = 'i';
+    ch[2] = 'a';
+    ch[3] = 'o';
+    ch[4] = 'z';
+    ch[5] = 'h';
+    ch[6] = 'i';
+    ch[7] = '\0';
+
+    cout << (void*)ch << ":" << ch << endl;
 
     CoroutineContext* ctx = get_cur_ctx();
     Yield(ctx);
@@ -53,8 +64,9 @@ int main(int argc, char* argv[], char* env[])
          << "    routine:" << (void*)routine
          << endl;
 
-    //ctx->StoreRegister();
+    int i = 0;
     cout << __func__ << ":" << __LINE__ << endl;
+    cout << __func__ << "&i:" << (void*)&i << endl;
     Resume(ctx);
 
     return 0;

@@ -3,15 +3,15 @@
 .type  AsmStoreRegister, @function
 
 AsmStoreRegister:
-	movq (%rdi)    , %rbx
+	movq %rdi      , %rbx
 	movq %rbp      , 8(%rbx)
 	movq %rsp      , 16(%rbx)
 	movq %rax      , 24(%rbx)
 	movq %rcx      , 32(%rbx)
 	movq %rdx      , 40(%rbx)
 	movq %rsi      , 48(%rbx)
-	movq (%rsp)    , %rcx
-	movq %rcx      , 56(%rbx)
+	leaq 8(%rsp)   , %rcx
+    movq %rcx, 56(%rbx)
 	movq $0x12ABCD , 64(%rbx)
 	ret
 
@@ -21,7 +21,7 @@ AsmStoreRegister:
 .type AsmLoadRegister, @function
 
 AsmLoadRegister:
-	movq  (%rdi)    , %rbx
+	movq  %rdi    , %rbx
 	movq  8(%rbx)   , %rbp
 	movq  16(%rbx)  , %rsp
 	movq  24(%rbx)  , %rax
