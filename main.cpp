@@ -12,7 +12,7 @@ struct UserParam
         : str(s)
         , i(0)
         , u64(12388)
-        , d(0.0)
+        , d(3.141592353)
     {
     }
 
@@ -21,7 +21,9 @@ struct UserParam
         std::ostringstream os;
         os << "str:" << str
            << ", i:" << i
-           << ", d:" <<d
+           << ", d:" << (int)d
+           << ", dd:" << (int)(d+1.045)
+           << ", ddd:" << (int)(d*d+1.045)
            << endl;
 
         return os.str();
@@ -30,11 +32,13 @@ struct UserParam
     std::string str;
     int i;
     uint64_t u64;
-    int64_t d;
+    // FIXME: double会崩溃
+    double d;
 };
 
-void routine(void* args)
+void UserCoroutineTestYeildAndResume(void* args)
 {
+    cout << (double)1 << endl;
     cout << __func__ << ", args:" << args << endl;
 
     UserParam* param = (UserParam*)args;
@@ -69,29 +73,20 @@ void routine(void* args)
 
 int main(int argc, char* argv[], char* env[])
 {
-    UserParam* param = new UserParam();
-    CoroutineContext* ctx = CoroutineCreate("routine", routine, param);
-
+    for (int i = 0; i != 1; ++i)
     {
-        for (int i = 0; i != 10; ++i)
-        {
-            ostringstream os;
-            os << "routine_" << i;
-            UserParam* param = new UserParam(os.str());
-            CoroutineContext* ctx = CoroutineCreate("routine", routine, param);
-        }
+        ostringstream os;
+        os << "routine_" << i;
+        UserParam* param = new UserParam(os.str());
+        CoroutineContext* ctx = CoroutineCreate("UserCoroutineTestYeildAndResume", UserCoroutineTestYeildAndResume, param);
+        Resume(ctx);
     }
 
-    cout << __func__ << ":" << "func addr:" << "\n"
-         << "    main:" << (void*)main
-         << "    routine:" << (void*)routine
-         << endl;
+    cout << __func__ << " # run schedule" << endl;
 
-    int i = 0;
-    cout << __func__ << ":" << __LINE__ << endl;
-    cout << __func__ << "&i:" << (void*)&i << endl;
+    schedule_thread(NULL);    
 
-    Resume(ctx);
+    cout << __func__ << " # main exit" << endl;
 
     return 0;
 }
