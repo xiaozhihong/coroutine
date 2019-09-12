@@ -8,9 +8,10 @@ using namespace std;
 
 struct UserParam
 {
-    UserParam()
-        : str("")
+    UserParam(const std::string& s = "")
+        : str(s)
         , i(0)
+        , u64(12388)
         , d(0.0)
     {
     }
@@ -18,7 +19,6 @@ struct UserParam
     std::string print()
     {
         std::ostringstream os;
-
         os << "str:" << str
            << ", i:" << i
            << ", d:" <<d
@@ -29,7 +29,8 @@ struct UserParam
 
     std::string str;
     int i;
-    double d;
+    uint64_t u64;
+    int64_t d;
 };
 
 void routine(void* args)
@@ -37,7 +38,8 @@ void routine(void* args)
     cout << __func__ << ", args:" << args << endl;
 
     UserParam* param = (UserParam*)args;
-    //cout << param->print() << endl;
+    cout << "param print:" << param->print() << endl;
+
     char ch[8];
     ch[0] = 'x';
     ch[1] = 'i';
@@ -58,6 +60,7 @@ void routine(void* args)
     {
         cout << dec << "(" << i << ") ---> yield by user" << endl;
         Yield(ctx);
+        cout << "param print:" << param->print() << endl;
         cout << "<--- resum" << endl;
     }
 
@@ -69,6 +72,16 @@ int main(int argc, char* argv[], char* env[])
     UserParam* param = new UserParam();
     CoroutineContext* ctx = CoroutineCreate("routine", routine, param);
 
+    {
+        for (int i = 0; i != 10; ++i)
+        {
+            ostringstream os;
+            os << "routine_" << i;
+            UserParam* param = new UserParam(os.str());
+            CoroutineContext* ctx = CoroutineCreate("routine", routine, param);
+        }
+    }
+
     cout << __func__ << ":" << "func addr:" << "\n"
          << "    main:" << (void*)main
          << "    routine:" << (void*)routine
@@ -77,6 +90,7 @@ int main(int argc, char* argv[], char* env[])
     int i = 0;
     cout << __func__ << ":" << __LINE__ << endl;
     cout << __func__ << "&i:" << (void*)&i << endl;
+
     Resume(ctx);
 
     return 0;

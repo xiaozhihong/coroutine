@@ -25,6 +25,5 @@ void CoroutineEntry(void* args);
 CoroutineContext* CoroutineCreate(const std::string& name, RoutineFunc routine_func, void* args);
 void Yield(CoroutineContext* ctx, const bool& pending = true);
 void Resume(CoroutineContext* ctx);
-void Swap(CoroutineContext* pre, CoroutineContext* cur);
 
 #endif // __COROUTINE_H__
