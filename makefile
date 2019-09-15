@@ -5,8 +5,9 @@ LIB_DIR        +=
 # ==========================================================
 CC             = gcc
 CXX 		   = g++
-CFLAGS         = -g -Wno-deprecated -W -O0
-CXXFLAGS       = -g -std=c++0x -O0
+CFLAGS         = -g -Wno-deprecated -W -O2 -fstrict-aliasing  -fno-omit-frame-pointer
+CXXFLAGS       = -g -std=c++0x -O2 -fstrict-aliasing  -fno-omit-frame-pointer 
+
 # ==========================================================
 SOURCES += $(wildcard ./*.cpp)
 SOURCES += $(wildcard ./*.S)

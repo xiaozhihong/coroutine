@@ -57,15 +57,20 @@ void schedule_thread(void* args)
 {
     while (true)
     {
-        std::cout << __func__ << std::endl;
-        usleep(100*1000);
-
         if (! g_ctx_list.empty())
         {
             CoroutineContext* ctx = g_ctx_list.front();
             g_ctx_list.pop_front();
-            std::cout << __func__ << " # resume pending ctx:" << (void*)ctx << std::endl;
-            Resume(ctx);
+            //std::cout << __func__ << " # resume pending ctx:" << (void*)ctx << std::endl;
+            if (ctx != NULL)
+            {
+                Resume(ctx);
+            }
+        }
+        else
+        {
+            std::cout << __func__ << " # usleep " << std::endl;
+            usleep(100000);
         }
     }
 }
@@ -111,29 +116,32 @@ CoroutineContext* CoroutineCreate(const std::string& name, RoutineFunc routine_f
 
     AsmInitRegister(ctx);
 
-    //print_ctx_stack(ctx);
-
     return ctx;
 }
 
 void Swap(CoroutineContext* pre, CoroutineContext* cur)
 {
     g_cur_ctx = cur;
-    std::cout << __func__ << " # pre ctx:" << pre << ", cur ctx:" << cur << std::endl;
-    print_ctx_stack(pre);
-    print_ctx_stack(cur);
     AsmSwapRegister(pre, cur);
 }
 
 void Yield(CoroutineContext* ctx)
 {
-    std::cout << __func__ << std::endl;
     g_ctx_list.push_back(ctx);
+#if 1
     Swap(ctx, get_thread_schedule_ctx());
+#else
+    g_cur_ctx = get_thread_schedule_ctx();
+    AsmSwapRegister(ctx, g_cur_ctx);
+#endif
 }
 
 void Resume(CoroutineContext* ctx)
 {
-    std::cout << __func__ << std::endl;
+#if 1
     Swap(get_thread_schedule_ctx(), ctx);
+#else
+    g_cur_ctx = ctx;
+    AsmSwapRegister(get_thread_schedule_ctx(), g_cur_ctx);
+#endif
 }

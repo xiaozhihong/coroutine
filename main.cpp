@@ -21,9 +21,9 @@ struct UserParam
         std::ostringstream os;
         os << "str:" << str
            << ", i:" << i
-           << ", d:" << (int)d
-           << ", dd:" << (int)(d+1.045)
-           << ", ddd:" << (int)(d*d+1.045)
+           << ", d:" << d
+           << ", dd:" << (d+1.045)
+           << ", ddd:" << (d*d+1.045)
            << endl;
 
         return os.str();
@@ -73,7 +73,7 @@ void UserCoroutineTestYeildAndResume(void* args)
 
 int main(int argc, char* argv[], char* env[])
 {
-    for (int i = 0; i != 1; ++i)
+    for (int i = 0; i != 2; ++i)
     {
         ostringstream os;
         os << "routine_" << i;
