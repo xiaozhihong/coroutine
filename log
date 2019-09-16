@@ -1,0 +1,83 @@
+stack:0x1286c60-0x128ac60, args:0x1286c20
+CoroutineCreate # push ctx:0x1286c60
+main:func addr:
+    main:0x4025f0    routine:0x402389
+main:97
+main&i:0x7ffc5c151dec
+Resume
+CoroutineEntry coroutine entry, ctx:0x1286c60, args:0x1286c20
+routine, args:0x1286c20
+i:0, u64:12388
+param print:
+0x128abe8:xiaozhi
+(0) ---> yield by user
+Yield
+Yield # push ctx:0x1286c60
+get_thread_schedule_ctx schedule_thread:0x40157e
+stack:0x128bcf0-0x128fcf0, args:0
+CoroutineCreate # push ctx:0x128bcf0
+CoroutineEntry coroutine entry, ctx:0x128bcf0, args:0
+schedule_thread
+schedule_thread
+schedule_thread # resume pending ctx:0x1286c60
+Resume
+i:0, u64:12388
+param print:
+<--- resum
+(1) ---> yield by user
+Yield
+Yield # push ctx:0x1286c60
+CoroutineEntry coroutine entry, ctx:0x128bcf0, args:0
+schedule_thread
+schedule_thread
+schedule_thread # resume pending ctx:0x1286c60
+Resume
+i:0, u64:12388
+param print:
+<--- resum
+(2) ---> yield by user
+Yield
+Yield # push ctx:0x1286c60
+CoroutineEntry coroutine entry, ctx:0x128bcf0, args:0
+schedule_thread
+schedule_thread
+schedule_thread # resume pending ctx:0x128bcf0
+Resume
+CoroutineEntry coroutine entry, ctx:0x128bcf0, args:0
+schedule_thread
+schedule_thread
+schedule_thread # resume pending ctx:0x1286c60
+Resume
+i:0, u64:12388
+param print:
+<--- resum
+(3) ---> yield by user
+Yield
+Yield # push ctx:0x1286c60
+CoroutineEntry coroutine entry, ctx:0x128bcf0, args:0
+schedule_thread
+schedule_thread
+schedule_thread # resume pending ctx:0x1286c60
+Resume
+i:0, u64:12388
+param print:
+<--- resum
+(4) ---> yield by user
+Yield
+Yield # push ctx:0x1286c60
+CoroutineEntry coroutine entry, ctx:0x128bcf0, args:0
+schedule_thread
+schedule_thread
+schedule_thread # resume pending ctx:0x1286c60
+Resume
+i:0, u64:12388
+param print:
+<--- resum
+routine
+CoroutineEntry coroutine done, ctx:0x1286c60
+Yield
+CoroutineEntry coroutine entry, ctx:0x128bcf0, args:0
+schedule_thread
+schedule_thread
+schedule_thread # resume pending ctx:0x1286c60
+Resume

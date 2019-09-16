@@ -7,35 +7,38 @@
 #include <iostream>
 
 #include "coroutine.h"
+#include "log.h"
 
-static void print_ctx_stack(CoroutineContext* ctx)
+static std::string CtxToString(CoroutineContext* ctx)
 {
-    std::cout << "ctx:" << "\"" << ctx->name_ << "\" " << std::hex << (void*)ctx << std::endl;
-    std::cout << "stack:" << std::hex << (void*)ctx->stack_ << std::endl;
+    char buf[1024];
+    int n = 0;
+
+    n += snprintf(buf + n, sizeof(buf), "ctx=%p, name=%s, stack=%p-%p\n", ctx, ctx->name_.c_str(), ctx->stack_ + ctx->stack_size_, ctx->stack_);
+
     if (ctx != NULL)
     {   
         uint64_t* p = (uint64_t*)ctx->stack_;
-        for (int i = 0; i != 12; ++i)
+        for (int i = 0; i != 8; ++i)
         {   
-            std::cout << std::dec << "[" << std::setw(2) << i << "](" << p << ") ";
-            std::cout << std::hex << "0x" << *p << std::endl;
-            p++;
+            n += snprintf(buf + n, sizeof(buf), "  [%02d]  %p  %p\n", i, p, (void*)*p++);
         }   
     }   
+
+    buf[n] = '\0';
+
+    return std::string(buf);
 }
 
 extern "C"
 {
     extern void AsmSwapRegister(CoroutineContext*, CoroutineContext*) asm("AsmSwapRegister");
-    extern void AsmInitRegister(CoroutineContext*) asm("AsmInitRegister");
     extern void AsmLoadRegister(CoroutineContext*) asm("AsmLoadRegister");
 }
 
-void CoroutineEntry(void* args)
+static void CoroutineEntry(void* args)
 {
     CoroutineContext* ctx = (CoroutineContext*)args;
-
-    std::cout << __func__ << " coroutine entry, ctx:" << ctx << ", args:" << ctx->args_ << std::endl;
 
     if (ctx->routine_func_)
     {
@@ -43,12 +46,11 @@ void CoroutineEntry(void* args)
     }
 
     delete ctx;
-    std::cout << __func__ << " coroutine done, ctx:" << ctx << std::endl;
-    AsmLoadRegister(get_thread_schedule_ctx());
+    AsmLoadRegister(get_main_ctx());
 }
 
-__thread CoroutineContext* g_schedule_ctx = NULL;
-__thread CoroutineContext* g_cur_ctx = NULL;
+CoroutineContext* g_schedule_ctx = NULL;
+CoroutineContext* g_cur_ctx = NULL;
 
 std::list<CoroutineContext*> g_ctx_list;
 
@@ -61,7 +63,6 @@ void schedule_thread(void* args)
         {
             CoroutineContext* ctx = g_ctx_list.front();
             g_ctx_list.pop_front();
-            //std::cout << __func__ << " # resume pending ctx:" << (void*)ctx << std::endl;
             if (ctx != NULL)
             {
                 Resume(ctx);
@@ -69,13 +70,12 @@ void schedule_thread(void* args)
         }
         else
         {
-            std::cout << __func__ << " # usleep " << std::endl;
-            usleep(100000);
+            usleep(10*1000);
         }
     }
 }
 
-CoroutineContext* get_thread_schedule_ctx()
+CoroutineContext* get_main_ctx()
 {
     if (g_schedule_ctx == NULL)
     {
@@ -114,34 +114,26 @@ CoroutineContext* CoroutineCreate(const std::string& name, RoutineFunc routine_f
     void* point_rip = ctx->stack_ + 4 * sizeof(void*);
     *((void**)point_rip) = (void*)CoroutineEntry;
 
-    AsmInitRegister(ctx);
-
     return ctx;
 }
 
 void Swap(CoroutineContext* pre, CoroutineContext* cur)
 {
     g_cur_ctx = cur;
+#if defined(DEBUG)
+    std::cout << LOG_PREFIX << CtxToString(pre) << std::endl;
+    std::cout << LOG_PREFIX << CtxToString(cur) << std::endl;
+#endif
     AsmSwapRegister(pre, cur);
 }
 
 void Yield(CoroutineContext* ctx)
 {
     g_ctx_list.push_back(ctx);
-#if 1
-    Swap(ctx, get_thread_schedule_ctx());
-#else
-    g_cur_ctx = get_thread_schedule_ctx();
-    AsmSwapRegister(ctx, g_cur_ctx);
-#endif
+    Swap(ctx, get_main_ctx());
 }
 
 void Resume(CoroutineContext* ctx)
 {
-#if 1
-    Swap(get_thread_schedule_ctx(), ctx);
-#else
-    g_cur_ctx = ctx;
-    AsmSwapRegister(get_thread_schedule_ctx(), g_cur_ctx);
-#endif
+    Swap(get_main_ctx(), ctx);
 }

@@ -21,10 +21,9 @@ struct CoroutineContext
 
 void schedule_thread(void* args);
 
-CoroutineContext* get_thread_schedule_ctx();
+CoroutineContext* get_main_ctx();
 CoroutineContext* get_cur_ctx();
 
-void CoroutineEntry(void* args);
 CoroutineContext* CoroutineCreate(const std::string& name, RoutineFunc routine_func, void* args);
 void Yield(CoroutineContext* ctx);
 void Resume(CoroutineContext* ctx);
