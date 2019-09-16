@@ -30,6 +30,17 @@ static std::string CtxToString(CoroutineContext* ctx)
     return std::string(buf);
 }
 
+static int AdjustStackSize(const int& stack_size)
+{
+    int adjust_stack_size = stack_size >> 4;
+    adjust_stack_size |= 0x1000;
+    adjust_stack_size <<= 4;
+
+    std::cout << LOG_PREFIX << "stack_size=" << stack_size << ", adjust_stack_size=" << adjust_stack_size << std::endl;
+
+    return adjust_stack_size;
+}
+
 extern "C"
 {
     extern void AsmSwapRegister(CoroutineContext*, CoroutineContext*) asm("AsmSwapRegister");
@@ -90,13 +101,14 @@ CoroutineContext* get_cur_ctx()
     return g_cur_ctx;
 }
 
-CoroutineContext* CreateCoroutine(const std::string& name, RoutineFunc routine_func, void* args)
+CoroutineContext* CreateCoroutine(const std::string& name, RoutineFunc routine_func, void* args, const int& stack_size)
 {
     CoroutineContext* ctx = new CoroutineContext();
 
     ctx->routine_func_ = routine_func;
     ctx->args_ = args;
-    ctx->stack_size_ = kDefaultStackSize;
+    ctx->stack_size_ = AdjustStackSize(stack_size);
+    ctx->stack_ = (uint8_t*)malloc(ctx->stack_size_);
     ctx->name_ = name;
 
     void* point_this = ctx->stack_;

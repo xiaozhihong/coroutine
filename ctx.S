@@ -3,38 +3,41 @@
 .type AsmSwapRegister, @function
 
 AsmSwapRegister:
-	movq  %rbp   , 8(%rdi)
-	movq  %rsp   , 16(%rdi)
-	movq  %rbx   , 24(%rdi)
+	movq  (%rdi), %rdx
+	movq  %rbp   , 8(%rdx)
+	movq  %rsp   , 16(%rdx)
+	movq  %rbx   , 24(%rdx)
 	movq  (%rsp) , %rax
-    movq  %rax   , 32(%rdi)
-	movq  %r12   , 40(%rdi)
-	movq  %r13   , 48(%rdi)
-	movq  %r14   , 56(%rdi)
-	movq  %r15   , 64(%rdi)
-	movq  8(%rsi)  , %rbp
-	movq  16(%rsi) , %rsp
+    movq  %rax   , 32(%rdx)
+	movq  %r12   , 40(%rdx)
+	movq  %r13   , 48(%rdx)
+	movq  %r14   , 56(%rdx)
+	movq  %r15   , 64(%rdx)
+	movq  (%rsi), %rdx
+	movq  8(%rdx)  , %rbp
+	movq  16(%rdx) , %rsp
     leaq 8(%rsp), %rsp
-	movq  24(%rsi) , %rbx
-	movq  40(%rsi) , %r12
-	movq  48(%rsi) , %r13
-	movq  56(%rsi) , %r14
-	movq  64(%rsi) , %r15
+	movq  24(%rdx) , %rbx
+	movq  40(%rdx) , %r12
+	movq  48(%rdx) , %r13
+	movq  56(%rdx) , %r14
+	movq  64(%rdx) , %r15
 	movq  %rsi   , %rdi
-	jmpq *32(%rsi)
+	jmpq *32(%rdx)
 
 // ==============================================================================
 .global AsmLoadRegister
 .type AsmLoadRegister, @function
 
 AsmLoadRegister:
-	movq  8(%rdi)  , %rbp
-	movq  16(%rdi) , %rsp
+	movq  (%rdi), %rdx
+	movq  8(%rdx)  , %rbp
+	movq  16(%rdx) , %rsp
     leaq 8(%rsp), %rsp
-	movq  24(%rdi) , %rbx
-	movq  40(%rdi) , %r12
-	movq  48(%rdi) , %r13
-	movq  56(%rdi) , %r14
-	movq  64(%rdi) , %r15
+	movq  24(%rdx) , %rbx
+	movq  40(%rdx) , %r12
+	movq  48(%rdx) , %r13
+	movq  56(%rdx) , %r14
+	movq  64(%rdx) , %r15
 	movq  %rdi   , %rdi
-	jmpq *32(%rdi)
+	jmpq *32(%rdx)

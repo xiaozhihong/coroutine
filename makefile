@@ -6,7 +6,7 @@ LIB_DIR        +=
 CC             = gcc
 CXX 		   = g++
 USER_MACRO     = -DDEBUG
-GNU_FLAGS      = -g -W -O2 -fstrict-aliasing  -fno-omit-frame-pointer $(USER_MACRO)
+GNU_FLAGS      = -g -W -O1 -fstrict-aliasing  -fno-omit-frame-pointer $(USER_MACRO)
 CFLAGS         = $(GNU_FLAGS)
 CXXFLAGS       = $(GNU_FLAGS) -std=c++0x
 
