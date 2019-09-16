@@ -16,7 +16,6 @@ struct CoroutineContext
     uint32_t stack_size_;
     RoutineFunc* routine_func_;
     std::string name_;
-    bool started_;
 };
 
 void schedule_thread(void* args);
@@ -24,7 +23,7 @@ void schedule_thread(void* args);
 CoroutineContext* get_main_ctx();
 CoroutineContext* get_cur_ctx();
 
-CoroutineContext* CoroutineCreate(const std::string& name, RoutineFunc routine_func, void* args);
+CoroutineContext* CreateCoroutine(const std::string& name, RoutineFunc routine_func, void* args);
 void Yield(CoroutineContext* ctx);
 void Resume(CoroutineContext* ctx);
 

@@ -49,8 +49,8 @@ static void CoroutineEntry(void* args)
     AsmLoadRegister(get_main_ctx());
 }
 
-CoroutineContext* g_schedule_ctx = NULL;
-CoroutineContext* g_cur_ctx = NULL;
+__thread CoroutineContext* g_schedule_ctx = NULL;
+__thread CoroutineContext* g_cur_ctx = NULL;
 
 std::list<CoroutineContext*> g_ctx_list;
 
@@ -79,7 +79,7 @@ CoroutineContext* get_main_ctx()
 {
     if (g_schedule_ctx == NULL)
     {
-        g_schedule_ctx = CoroutineCreate("main", NULL, NULL);
+        g_schedule_ctx = CreateCoroutine("main", NULL, NULL);
     }
 
     return g_schedule_ctx;
@@ -90,7 +90,7 @@ CoroutineContext* get_cur_ctx()
     return g_cur_ctx;
 }
 
-CoroutineContext* CoroutineCreate(const std::string& name, RoutineFunc routine_func, void* args)
+CoroutineContext* CreateCoroutine(const std::string& name, RoutineFunc routine_func, void* args)
 {
     CoroutineContext* ctx = new CoroutineContext();
 

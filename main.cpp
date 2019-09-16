@@ -58,7 +58,7 @@ int main(int argc, char* argv[], char* env[])
         ostringstream os;
         os << "routine_" << i;
         UserParam* param = new UserParam(os.str());
-        CoroutineContext* ctx = CoroutineCreate("TestYield", TestYield, param);
+        CoroutineContext* ctx = CreateCoroutine("TestYield", TestYield, param);
         Resume(ctx);
     }
 
