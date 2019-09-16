@@ -65,7 +65,6 @@ __thread CoroutineContext* g_cur_ctx = NULL;
 
 std::list<CoroutineContext*> g_ctx_list;
 
-void CoEventLoop();
 void schedule_thread(void* args)
 {
     while (true)
