@@ -1,6 +1,0 @@
-#include "coroutinue.h"
-
-int main()
-{
-    return 0;
-}
