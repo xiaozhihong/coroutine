@@ -26,5 +26,6 @@ CoroutineContext* get_cur_ctx();
 CoroutineContext* CreateCoroutine(const std::string& name, RoutineFunc routine_func, void* args = NULL, const int& stack_size = kDefaultStackSize);
 void Yield(CoroutineContext* ctx);
 void Resume(CoroutineContext* ctx);
+void Swap(CoroutineContext* pre, CoroutineContext* cur);
 
 #endif // __COROUTINE_H__

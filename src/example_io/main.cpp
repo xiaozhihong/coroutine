@@ -1,5 +1,6 @@
 #include <sys/epoll.h>
 
+#include <assert.h>
 #include <signal.h>
 #include <unistd.h>
 
@@ -18,27 +19,29 @@ using namespace std;
 void EchoRoutine(void* args)
 {
     int fd = (uint64_t)args;
-    while (true)
+    bool error = false;
+
+    get_epoller()->Add(fd, EPOLLIN, get_cur_ctx());
+
+    while (! error)
     {
         uint8_t buf[1024];
-        int ret = read(fd, buf, sizeof(buf));
+
+        int ret = Read(fd, buf, sizeof(buf));
+
+        cout << "read " << ret << endl;
 
         if (ret > 0)
         {
-            cout << "read " << ret << " bytes" << endl;
+            ret = WriteGivenSize(fd, buf, ret);
 
-            write(fd, buf, ret);
+            if (ret < 0)
+            {
+                break;
+            }
         }
         else if (ret < 0)
         {
-            if (errno == EAGAIN)
-            {
-                //cout << "-> yield" << endl;
-                Yield(get_cur_ctx());
-                //cout << "<- resume" << endl;
-                continue;
-            }
-
             break;
         }
         else if (ret == 0)
@@ -75,21 +78,31 @@ void AcceptRoutine(void* args)
         {
             if (errno == EAGAIN)
             {
-                cout << "-> yield" << endl;
+                cout << "-> accept yield" << endl;
                 Yield(get_cur_ctx());
-                cout << "<- resume" << endl;
+                cout << "<- accept resume" << endl;
                 continue;
             }
             else
             {
-                return;
+                cout << "accept error" << endl;
+                break;
             }
         }
 
         cout << "accept " << client_ip << ":" << client_port << ", fd=" << ret << endl;
         CoroutineContext* echo_ctx = CreateCoroutine("EchoRoutine", EchoRoutine, (void*)ret);
         SocketUtil::SetBlock(ret, 0);
-        get_epoller()->Add(ret, EPOLLIN | EPOLLOUT, echo_ctx);
+#if 0
+        // FIXME:进去再出来, 不需要从main调度一次, 这种写法会有BUG, 怎么解决好一点
+        cout << "Resume To EchoRoutine" << endl;
+        cout << "main:" << get_main_ctx() << ", accept:" << get_cur_ctx() << ", echo:" << echo_ctx << endl;
+        Resume(echo_ctx);
+        cout << "EchoRoutine resume to AcceptRoutine" << endl;
+        cout << "main:" << get_main_ctx() << ", accept:" << get_cur_ctx() << ", echo:" << echo_ctx << endl;
+#else
+        Swap(get_cur_ctx(), echo_ctx);
+#endif
     }
 }
 
@@ -101,21 +114,7 @@ int main(int argc, char* argv[], char* env[])
     CoroutineContext* accept_ctx = CreateCoroutine("AcceptRoutine", AcceptRoutine, NULL);
     Resume(accept_ctx);
 
-    while (true)
-    {
-        vector<CoroutineContext*> active_ctx;
-        EpollWait(active_ctx);
-
-        if (active_ctx.empty())
-        {
-            //cout << "timeout, no events" << endl;
-        }
-
-        for (auto& ctx : active_ctx)
-        {
-            Resume(ctx);
-        }
-    }
+    EventLoop();
 
     return 0;
 }
