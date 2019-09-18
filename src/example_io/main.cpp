@@ -106,7 +106,6 @@ void AcceptRoutine(void* args)
     }
 }
 
-
 int main(int argc, char* argv[], char* env[])
 {
     signal(SIGPIPE, SIG_IGN);

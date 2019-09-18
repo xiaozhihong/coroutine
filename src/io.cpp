@@ -44,7 +44,7 @@ void EventLoop()
     }
 }
 
-int Read(const int& fd, uint8_t* data, const size_t& size)
+int Read(const int& fd, uint8_t* data, const int& size)
 {
     int ret = -1;
     while (true)
@@ -74,7 +74,7 @@ int Read(const int& fd, uint8_t* data, const size_t& size)
     return ret;
 }
 
-int Write(const int& fd, const uint8_t* data, const size_t& size)
+int Write(const int& fd, const uint8_t* data, const int& size)
 {
     int ret = 0;
 
@@ -102,7 +102,7 @@ int Write(const int& fd, const uint8_t* data, const size_t& size)
     return ret;
 }
 
-int ReadGivenSize(const int& fd, uint8_t* data, const size_t& size)
+int ReadGivenSize(const int& fd, uint8_t* data, const int& size)
 {
     int nbytes = 0;
     while (nbytes != size)
@@ -122,7 +122,7 @@ int ReadGivenSize(const int& fd, uint8_t* data, const size_t& size)
     return nbytes;
 }
 
-int WriteGivenSize(const int& fd, const uint8_t* data, const size_t& size)
+int WriteGivenSize(const int& fd, const uint8_t* data, const int& size)
 {
     int nbytes = 0;
     while (nbytes != size)
