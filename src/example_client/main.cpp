@@ -58,14 +58,14 @@ void SendCoroutine(void* args)
             
             if (ret > 0)
             {
-                if (WriteGivenSize(fd, buf, ret) < 0)
+                if (WriteGivenSize(fd, buf, ret) <= 0)
                 {
                     cout << "write " << ret << " bytes failed" << endl;
                     error = true;
                     break;
                 }
 
-                if (ReadGivenSize(fd, buf, ret) < 0)
+                if (ReadGivenSize(fd, buf, ret) <= 0)
                 {
                     cout << "read " << ret << " bytes failed" << endl;
                     error = true;
@@ -79,6 +79,8 @@ void SendCoroutine(void* args)
         }
         close(file_fd);
     }
+
+    get_epoller()->Del(fd);
 }
 
 int main(int argc, char* argv[], char* env[])
