@@ -1,6 +1,8 @@
 #ifndef __EPOLLER_H__
 #define __EPOLLER_H__
 
+#include <sys/epoll.h>
+
 #include <map>
 #include <vector>
 

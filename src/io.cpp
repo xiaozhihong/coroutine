@@ -1,10 +1,13 @@
 #include <unistd.h>
 
+#include <iostream>
 #include <vector>
 
 #include "coroutine.h"
 #include "epoller.h"
 #include "io.h"
+#include "log.h"
+#include "socket_util.h"
 
 __thread bool event_loop_quit = false;
 __thread Epoller* g_epoller = NULL;
@@ -44,6 +47,34 @@ void EventLoop()
     }
 }
 
+int Connect(const int& fd, const std::string& ip, const uint16_t& port)
+{
+    int ret = SocketUtil::Connect(fd, ip, port);
+
+    if (ret < 0)
+    {
+        if (errno == EINPROGRESS)
+        {
+            get_epoller()->Add(fd, EPOLLOUT, get_cur_ctx());
+            std::cout << LOG_PREFIX << " connect yield" << std::endl;
+            Yield(get_cur_ctx());
+            get_epoller()->Add(fd, EPOLLIN, get_cur_ctx());
+            std::cout << LOG_PREFIX << " connect resume" << std::endl;
+        }
+    }
+
+	int err = 0;
+    ret = SocketUtil::GetError(fd, err);
+
+    if (ret < 0 || err < 0)
+    {   
+        std::cout << "connect " << ip << ":" << port << " failed" << std::endl;
+        return -1;
+    }   
+
+    return 0;
+}
+
 int Read(const int& fd, uint8_t* data, const int& size)
 {
     int ret = -1;
@@ -62,7 +93,9 @@ int Read(const int& fd, uint8_t* data, const int& size)
         {
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
             {
+                std::cout << LOG_PREFIX << " read yield" << std::endl;
                 Yield(get_cur_ctx());
+                std::cout << LOG_PREFIX << " read resume" << std::endl;
             }
             else
             {
@@ -90,7 +123,9 @@ int Write(const int& fd, const uint8_t* data, const int& size)
         {
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
             {
+                std::cout << LOG_PREFIX << " write yield" << std::endl;
                 Yield(get_cur_ctx());
+                std::cout << LOG_PREFIX << " write resume" << std::endl;
             }
             else
             {
@@ -125,6 +160,7 @@ int ReadGivenSize(const int& fd, uint8_t* data, const int& size)
 int WriteGivenSize(const int& fd, const uint8_t* data, const int& size)
 {
     int nbytes = 0;
+    get_epoller()->Add(fd, EPOLLOUT, get_cur_ctx());
     while (nbytes != size)
     {
         int ret = Write(fd, data, size);
@@ -138,6 +174,7 @@ int WriteGivenSize(const int& fd, const uint8_t* data, const int& size)
             return ret;
         }
     }
+    get_epoller()->Add(fd, EPOLLIN, get_cur_ctx());
 
     return nbytes;
 }

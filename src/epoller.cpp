@@ -1,5 +1,3 @@
-#include <sys/epoll.h>
-
 #include <unistd.h>
 
 #include <iostream>
@@ -32,7 +30,13 @@ int Epoller::Add(const int& fd, const uint32_t& events, void* args)
     event.events = events;
     event.data.ptr = (void*)args;
 
-    int ret = epoll_ctl(epoller_fd_, EPOLL_CTL_ADD, fd, &event);
+    int op = EPOLL_CTL_ADD;
+    if (fd_exist)
+    {
+        op = EPOLL_CTL_MOD;
+    }
+
+    int ret = epoll_ctl(epoller_fd_, op, fd, &event);
     if (ret < 0)
     {
         std::cout << PrintErr("epoll_ctl", errno) << std::endl;
@@ -72,11 +76,19 @@ int Epoller::Del(const int& fd)
 void Epoller::Wait(const int& ms, std::vector<void*>& active)
 {
     static epoll_event events[1024];
-    int event_num = epoll_wait(epoller_fd_, events, sizeof(events), ms);
+    int ret = epoll_wait(epoller_fd_, events, sizeof(events), ms);
 
-    for (int i = 0; i != event_num; ++i)
+    if (ret > 0)
     {
-        active.push_back(events[i].data.ptr);
+        std::cout << LOG_PREFIX << ret << " events happen" << std::endl;
+        for (int i = 0; i != ret; ++i)
+        {
+            active.push_back(events[i].data.ptr);
+        }
+    }
+    else if (ret < 0)
+    {
+        std::cout << PrintErr("epoll_wait", errno) << std::endl;
     }
 }
 
