@@ -1,3 +1,4 @@
+#include "log.h"
 #include "socket_util.h"
 #include "util.h"
 

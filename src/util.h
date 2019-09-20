@@ -12,15 +12,10 @@
 #include <sstream>
 #include <string>
 
-#define LogErr std::cerr<<__FILE__<<" | "<<__func__<<":"<<__LINE__<<" # "
-#define LogInfo std::cout<<__FILE__<<" | "<<__func__<<":"<<__LINE__<<" # "
-#define LogDebug std::cout<<__FILE__<<" | "<<__func__<<":"<<__LINE__<<" # "
-
+#include "log.h"
 
 #define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
-
-class IoBuffer;
 
 inline void IgnoreSignalPipe()
 {
@@ -64,7 +59,6 @@ inline bool IsIpStr(const std::string& str)
 
     return true;
 }
-
 
 std::string BinToHex(const std::string& str, const size_t& one_line_count = 16, const bool& print_ascii = true);
 std::string BinToHex(const uint8_t* buf, const size_t& len, const size_t& one_line_count = 16, const bool& print_ascii = true);

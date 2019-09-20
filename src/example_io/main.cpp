@@ -11,6 +11,7 @@
 
 #include "coroutine.h"
 #include "epoller.h"
+#include "log.h"
 #include "io.h"
 #include "socket_util.h"
 
@@ -29,7 +30,7 @@ void EchoRoutine(void* args)
 
         int ret = Read(fd, buf, sizeof(buf));
 
-        cout << "read " << ret << endl;
+        LogDebug << "read " << ret << endl;
 
         if (ret > 0)
         {
@@ -46,20 +47,20 @@ void EchoRoutine(void* args)
         }
         else if (ret == 0)
         {
-            cout << "read EOF" << endl;
+            LogDebug << "read EOF" << endl;
             break;
         }
     }
     
     get_epoller()->Del(fd);
-    cout << "close fd=" << fd << endl;
+    LogDebug << "close fd=" << fd << endl;
     close(fd);
 }
 
 void AcceptRoutine(void* args)
 {
     int server_fd = SocketUtil::CreateTcpSocket();
-    cout << "server_fd=" << server_fd << endl;
+    LogDebug << "server_fd=" << server_fd << endl;
 
     SocketUtil::SetBlock(server_fd, 0);
     SocketUtil::ReuseAddr(server_fd);
@@ -78,28 +79,28 @@ void AcceptRoutine(void* args)
         {
             if (errno == EAGAIN)
             {
-                cout << "-> accept yield" << endl;
+                LogDebug << "-> accept yield" << endl;
                 Yield(get_cur_ctx());
-                cout << "<- accept resume" << endl;
+                LogDebug << "<- accept resume" << endl;
                 continue;
             }
             else
             {
-                cout << "accept error" << endl;
+                LogDebug << "accept error" << endl;
                 break;
             }
         }
 
-        cout << "accept " << client_ip << ":" << client_port << ", fd=" << ret << endl;
+        LogDebug << "accept " << client_ip << ":" << client_port << ", fd=" << ret << endl;
         CoroutineContext* echo_ctx = CreateCoroutine("EchoRoutine", EchoRoutine, (void*)ret);
         SocketUtil::SetBlock(ret, 0);
 #if 0
         // FIXME:进去再出来, 不需要从main调度一次, 这种写法会有BUG, 怎么解决好一点
-        cout << "Resume To EchoRoutine" << endl;
-        cout << "main:" << get_main_ctx() << ", accept:" << get_cur_ctx() << ", echo:" << echo_ctx << endl;
+        LogDebug << "Resume To EchoRoutine" << endl;
+        LogDebug << "main:" << get_main_ctx() << ", accept:" << get_cur_ctx() << ", echo:" << echo_ctx << endl;
         Resume(echo_ctx);
-        cout << "EchoRoutine resume to AcceptRoutine" << endl;
-        cout << "main:" << get_main_ctx() << ", accept:" << get_cur_ctx() << ", echo:" << echo_ctx << endl;
+        LogDebug << "EchoRoutine resume to AcceptRoutine" << endl;
+        LogDebug << "main:" << get_main_ctx() << ", accept:" << get_cur_ctx() << ", echo:" << echo_ctx << endl;
 #else
         Swap(get_cur_ctx(), echo_ctx);
 #endif

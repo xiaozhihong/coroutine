@@ -36,7 +36,7 @@ static int AdjustStackSize(const int& stack_size)
     adjust_stack_size |= 0x1000;
     adjust_stack_size <<= 4;
 
-    std::cout << LOG_PREFIX << "stack_size=" << stack_size << ", adjust_stack_size=" << adjust_stack_size << std::endl;
+    LogDebug << LOG_PREFIX << "stack_size=" << stack_size << ", adjust_stack_size=" << adjust_stack_size << std::endl;
 
     return adjust_stack_size;
 }
@@ -132,8 +132,8 @@ void Swap(CoroutineContext* pre, CoroutineContext* cur)
 {
     g_cur_ctx = cur;
 #if defined(DEBUG)
-    std::cout << LOG_PREFIX << CtxToString(pre) << std::endl;
-    std::cout << LOG_PREFIX << CtxToString(cur) << std::endl;
+    LogDebug << LOG_PREFIX << CtxToString(pre) << std::endl;
+    LogDebug << LOG_PREFIX << CtxToString(cur) << std::endl;
 #endif
     AsmSwapRegister(pre, cur);
 }

@@ -13,6 +13,7 @@
 #include "coroutine.h"
 #include "epoller.h"
 #include "io.h"
+#include "log.h"
 #include "socket_util.h"
 #include "util.h"
 
@@ -45,8 +46,8 @@ void SendCoroutine(void* args)
 
         if (file_fd < 0)
         {
-            cout << "open " << file << " failed." << endl;
-            cout << PrintErr("open", errno) << endl;
+            LogDebug << "open " << file << " failed." << endl;
+            LogDebug << PrintErr("open", errno) << endl;
             break;
         }
 
@@ -60,14 +61,14 @@ void SendCoroutine(void* args)
             {
                 if (WriteGivenSize(fd, buf, ret) <= 0)
                 {
-                    cout << "write " << ret << " bytes failed" << endl;
+                    LogDebug << "write " << ret << " bytes failed" << endl;
                     error = true;
                     break;
                 }
 
                 if (ReadGivenSize(fd, buf, ret) <= 0)
                 {
-                    cout << "read " << ret << " bytes failed" << endl;
+                    LogDebug << "read " << ret << " bytes failed" << endl;
                     error = true;
                     break;
                 }
@@ -89,7 +90,7 @@ int main(int argc, char* argv[], char* env[])
 
     if (argc < 4)
     {
-        cout << "Usage ./main <ip> <port> <file>" << endl;
+        LogDebug << "Usage ./main <ip> <port> <file>" << endl;
         return -1;
     }
 

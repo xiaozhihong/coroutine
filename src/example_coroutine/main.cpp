@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "coroutine.h"
+#include "log.h"
 
 using namespace std;
 
@@ -36,7 +37,7 @@ struct UserParam
 void TestYield(void* args)
 {
     UserParam* param = (UserParam*)args;
-    cout << "param=" << param->dump() << endl;
+    LogDebug << "param=" << param->dump() << endl;
 
     CoroutineContext* ctx = get_cur_ctx();
 
@@ -44,10 +45,10 @@ void TestYield(void* args)
 
     for (int i = 0; i != 10; ++i)
     {
-        cout << dec << "(" << i << ") ---> yield" << endl;
+        LogDebug << dec << "(" << i << ") ---> yield" << endl;
         Yield(ctx);
-        cout << dec << "(" << i << ") <--- resume" << endl;
-        cout << "param=" << param->dump() << endl;
+        LogDebug << dec << "(" << i << ") <--- resume" << endl;
+        LogDebug << "param=" << param->dump() << endl;
     }
 }
 
@@ -62,11 +63,11 @@ int main(int argc, char* argv[], char* env[])
         Resume(ctx);
     }
 
-    cout << __func__ << " # run schedule" << endl;
+    LogDebug << __func__ << " # run schedule" << endl;
 
     schedule_thread(NULL);    
 
-    cout << __func__ << " # main exit" << endl;
+    LogDebug << __func__ << " # main exit" << endl;
 
     return 0;
 }
