@@ -73,23 +73,37 @@ int Epoller::Del(const int& fd)
     return ret;
 }
 
-void Epoller::Wait(const int& ms, std::vector<void*>& active)
+void Epoller::Wait(const int& ms, std::vector<void*>& active, std::vector<void*>& timeout)
 {
     static epoll_event events[1024];
     int ret = epoll_wait(epoller_fd_, events, sizeof(events), ms);
+
+    std::set<void*> timeout_set;
+    TakeTimeout(timeout_set);
 
     if (ret > 0)
     {
         LogDebug << LOG_PREFIX << ret << " events happen" << std::endl;
         for (int i = 0; i != ret; ++i)
         {
-            active.push_back(events[i].data.ptr);
+            void* data = events[i].data.ptr;
+            active.push_back(data);
+            timeout_set.erase(data);
         }
     }
     else if (ret < 0)
     {
         LogDebug << PrintErr("epoll_wait", errno) << std::endl;
     }
+
+    for (const auto& item : timeout_set)
+    {
+        timeout.push_back(item);
+    }
+
+#if defined(DEBUG)
+    LogDebug << LOG_PREFIX << ret << " event happend, " << timeout.size() << " event timeout" << ", waitting=" << timeout_map_.size() << std::endl;
+#endif
 }
 
 int Epoller::GetFd(const int& fd, uint32_t& events)
@@ -122,4 +136,27 @@ void Epoller::DelFd(const int& fd)
 {
     LogDebug << LOG_PREFIX << "fd=" << fd << std::endl;
     fd_events_.erase(fd);
+}
+
+void Epoller::TimeoutAt(void* args, const uint64_t& ms)
+{
+    timeout_map_.insert(std::make_pair(ms, args));
+}
+
+void Epoller::TimeoutAfter(void* args, const uint64_t& ms)
+{
+    TimeoutAt(args, GetNowInMillSecond() + ms);
+}
+
+void Epoller::TakeTimeout(std::set<void*>& timeout)
+{
+    uint64_t now_ms = GetNowInMillSecond();
+    auto iter_end = timeout_map_.lower_bound(now_ms);
+
+    auto iter = timeout_map_.begin();
+    while (iter != iter_end)
+    {
+        timeout.insert(iter->second);
+        iter = timeout_map_.erase(iter);
+    }
 }

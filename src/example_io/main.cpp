@@ -94,16 +94,7 @@ void AcceptRoutine(void* args)
         LogDebug << "accept " << client_ip << ":" << client_port << ", fd=" << ret << endl;
         CoroutineContext* echo_ctx = CreateCoroutine("EchoRoutine", EchoRoutine, (void*)ret);
         SocketUtil::SetBlock(ret, 0);
-#if 0
-        // FIXME:进去再出来, 不需要从main调度一次, 这种写法会有BUG, 怎么解决好一点
-        LogDebug << "Resume To EchoRoutine" << endl;
-        LogDebug << "main:" << get_main_ctx() << ", accept:" << get_cur_ctx() << ", echo:" << echo_ctx << endl;
         Resume(echo_ctx);
-        LogDebug << "EchoRoutine resume to AcceptRoutine" << endl;
-        LogDebug << "main:" << get_main_ctx() << ", accept:" << get_cur_ctx() << ", echo:" << echo_ctx << endl;
-#else
-        Swap(get_cur_ctx(), echo_ctx);
-#endif
     }
 }
 

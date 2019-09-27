@@ -22,14 +22,20 @@ Epoller* get_epoller()
     return g_epoller;
 }
 
-void EpollWait(std::vector<CoroutineContext*>& actives)
+void EpollWait(std::vector<CoroutineContext*>& actives, std::vector<CoroutineContext*>& timeouts)
 {
-    std::vector<void*> tmp;
-    get_epoller()->Wait(100, tmp);
+    std::vector<void*> tmp_actives;
+    std::vector<void*> tmp_timeouts;
+    get_epoller()->Wait(100, tmp_actives, tmp_timeouts);
 
-    for (const auto& ctx : tmp)
+    for (const auto& ctx : tmp_actives)
     {
         actives.push_back((CoroutineContext*)ctx);
+    }
+
+    for (const auto& ctx : tmp_timeouts)
+    {
+        timeouts.push_back((CoroutineContext*)ctx);
     }
 }
 
@@ -38,12 +44,18 @@ void EventLoop()
     while (! event_loop_quit)
     {   
         std::vector<CoroutineContext*> active_ctx;
-        EpollWait(active_ctx);
+        std::vector<CoroutineContext*> timeout_ctx;
+        EpollWait(active_ctx, timeout_ctx);
 
         for (auto& ctx : active_ctx)
         {   
             Resume(ctx);
         }   
+
+        for (auto& ctx : timeout_ctx)
+        {
+            Resume(ctx);
+        }
     }
 }
 
