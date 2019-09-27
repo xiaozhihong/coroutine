@@ -69,6 +69,7 @@ static void CoroutineEntry(void* args)
     LogDebug << LOG_PREFIX << " ---- caller coroutine ----\n" << CtxToString(caller_ctx) << std::endl;
 #endif
 
+    free(ctx->stack_);
     delete ctx;
 
     AsmLoadRegister(caller_ctx);

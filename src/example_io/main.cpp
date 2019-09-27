@@ -34,6 +34,9 @@ void EchoRoutine(void* args)
 
         if (ret > 0)
         {
+            buf[ret] = '\0';
+            LogDebug << "read msg:" << buf << endl;
+
             ret = WriteGivenSize(fd, buf, ret);
 
             if (ret < 0)
