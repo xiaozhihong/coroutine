@@ -83,7 +83,7 @@ void AcceptRoutine(void* args)
             if (errno == EAGAIN)
             {
                 LogDebug << "-> accept yield" << endl;
-                Yield(get_cur_ctx());
+                Yield();
                 LogDebug << "<- accept resume" << endl;
                 continue;
             }

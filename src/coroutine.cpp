@@ -48,8 +48,8 @@ extern "C"
 }
 
 __thread bool g_init = false;
-__thread CoroutineContext* g_ctx_call_link[64] = { 0 };
-__thread int g_ctx_call_link_index = 0;
+__thread CoroutineContext* g_ctx_stack[64] = { 0 };
+__thread int g_ctx_stack_top = 0;
 
 static void CoroutineEntry(void* args)
 {
@@ -62,8 +62,8 @@ static void CoroutineEntry(void* args)
         ctx->routine_func_(ctx->args_);
     }
 
-    CoroutineContext* caller_ctx = g_ctx_call_link[g_ctx_call_link_index - 2];
-    --g_ctx_call_link_index;
+    CoroutineContext* caller_ctx = g_ctx_stack[g_ctx_stack_top - 2];
+    --g_ctx_stack_top;
 #if defined(DEBUG)
     LogDebug << LOG_PREFIX << " ---- coroutine stop ----\n" << CtxToString(ctx) << std::endl;
     LogDebug << LOG_PREFIX << " ---- caller coroutine ----\n" << CtxToString(caller_ctx) << std::endl;
@@ -75,10 +75,11 @@ static void CoroutineEntry(void* args)
     AsmLoadRegister(caller_ctx);
 }
 
+#define CUR_CTX g_ctx_stack[g_ctx_stack_top - 1]
 
 CoroutineContext* get_cur_ctx()
 {
-    return g_ctx_call_link[g_ctx_call_link_index - 1];
+    return CUR_CTX;
 }
 
 CoroutineContext* CreateCoroutine(const std::string& name, RoutineFunc routine_func, void* args, const int& stack_size)
@@ -87,8 +88,8 @@ CoroutineContext* CreateCoroutine(const std::string& name, RoutineFunc routine_f
     {
         g_init = true;
         LogDebug << LOG_PREFIX << "init main ctx" << std::endl;
-        g_ctx_call_link[0] = CreateCoroutine("main", NULL, NULL, 8192);
-        ++g_ctx_call_link_index;
+        g_ctx_stack[0] = CreateCoroutine("main", NULL, NULL, 8192);
+        ++g_ctx_stack_top;
     }
 
     CoroutineContext* ctx = new CoroutineContext();
@@ -126,24 +127,25 @@ void Swap(CoroutineContext* pre, CoroutineContext* cur)
     AsmSwapRegister(pre, cur);
 }
 
-void Yield(CoroutineContext* ctx)
+void Yield()
 {
-    CoroutineContext* caller_ctx = g_ctx_call_link[g_ctx_call_link_index - 2];
+    CoroutineContext* cur_ctx = CUR_CTX;
+    CoroutineContext* caller_ctx = g_ctx_stack[g_ctx_stack_top - 2];
 #if defined(DEBUG)
-    LogDebug << LOG_PREFIX << "caller:" << caller_ctx << ", g_ctx_call_link_index:" << g_ctx_call_link_index << std::endl;
+    LogDebug << LOG_PREFIX << "caller:" << caller_ctx << ", g_ctx_stack_top:" << g_ctx_stack_top << std::endl;
 #endif
-    --g_ctx_call_link_index;
-    Swap(ctx, caller_ctx);
+    --g_ctx_stack_top;
+    Swap(cur_ctx, caller_ctx);
 }
 
 void Resume(CoroutineContext* ctx)
 {
-    CoroutineContext* caller_ctx = g_ctx_call_link[g_ctx_call_link_index - 1];
+    CoroutineContext* caller_ctx = g_ctx_stack[g_ctx_stack_top - 1];
 #if defined(DEBUG)
-    LogDebug << LOG_PREFIX << "caller:" << caller_ctx << ", g_ctx_call_link_index:" << g_ctx_call_link_index << std::endl;
+    LogDebug << LOG_PREFIX << "caller:" << caller_ctx << ", g_ctx_stack_top:" << g_ctx_stack_top << std::endl;
 #endif
-    g_ctx_call_link[g_ctx_call_link_index] = ctx;
-    ++g_ctx_call_link_index;
+    g_ctx_stack[g_ctx_stack_top] = ctx;
+    ++g_ctx_stack_top;
 
     Swap(caller_ctx, ctx);
 }

@@ -69,7 +69,7 @@ int Connect(const int& fd, const std::string& ip, const uint16_t& port)
         {
             get_epoller()->Add(fd, EPOLLOUT, get_cur_ctx());
             LogDebug << LOG_PREFIX << " connect yield" << std::endl;
-            Yield(get_cur_ctx());
+            Yield();
             get_epoller()->Add(fd, EPOLLIN, get_cur_ctx());
             LogDebug << LOG_PREFIX << " connect resume" << std::endl;
         }
@@ -106,7 +106,7 @@ int Read(const int& fd, uint8_t* data, const int& size)
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
             {
                 LogDebug << LOG_PREFIX << " read yield" << std::endl;
-                Yield(get_cur_ctx());
+                Yield();
                 LogDebug << LOG_PREFIX << " read resume" << std::endl;
             }
             else
@@ -136,7 +136,7 @@ int Write(const int& fd, const uint8_t* data, const int& size)
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
             {
                 LogDebug << LOG_PREFIX << " write yield" << std::endl;
-                Yield(get_cur_ctx());
+                Yield();
                 LogDebug << LOG_PREFIX << " write resume" << std::endl;
             }
             else
