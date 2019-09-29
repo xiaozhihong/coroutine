@@ -190,3 +190,8 @@ int WriteGivenSize(const int& fd, const uint8_t* data, const int& size)
 
     return nbytes;
 }
+
+void SleepMs(const int& ms)
+{
+    get_epoller()->TimeoutAfter(get_cur_ctx(), ms);
+}

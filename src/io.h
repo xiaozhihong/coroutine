@@ -15,4 +15,6 @@ int Write(const int& fd, const uint8_t* data, const int& size);
 int ReadGivenSize(const int& fd, uint8_t* data, const int& size);
 int WriteGivenSize(const int& fd, const uint8_t* data, const int& size);
 
+void SleepMs(const int& ms);
+
 #endif // __IO_H__
