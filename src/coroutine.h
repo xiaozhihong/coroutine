@@ -6,6 +6,7 @@
 #include <string>
 
 typedef void(RoutineFunc)(void*);
+typedef uint64_t CID;
 
 const int kDefaultStackSize = 16*1024;
 
@@ -16,9 +17,11 @@ struct CoroutineContext
     uint32_t stack_size_;
     RoutineFunc* routine_func_;
     std::string name_;
+    CID cid_;
 };
 
 CoroutineContext* get_cur_ctx();
+CID get_cid();
 
 CoroutineContext* CreateCoroutine(const std::string& name, RoutineFunc routine_func, void* args = NULL, const int& stack_size = kDefaultStackSize);
 

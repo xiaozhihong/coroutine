@@ -12,7 +12,9 @@ class SocketUtil
 public:
     static int CreateSocket(const int& type);
     static int CreateTcpSocket();
+    static int CreateUdpSocket();
     static int IpPortToSocketAddr(const std::string& ip, const uint16_t& port, sockaddr_in& addr);
+    static int InAddrToIp(const in_addr& in, std::string& ip);
     static int SocketAddrToIpPort(const sockaddr_in& addr, std::string& ip, uint16_t& port);
     static int Bind(const int& fd, const std::string& ip, const uint16_t& port);
     static int Listen(const int& fd);

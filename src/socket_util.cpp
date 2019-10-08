@@ -27,6 +27,11 @@ int SocketUtil::CreateTcpSocket()
     return CreateSocket(SOCK_STREAM);
 }
 
+int SocketUtil::CreateUdpSocket()
+{
+    return CreateSocket(SOCK_DGRAM);
+}
+
 int SocketUtil::IpPortToSocketAddr(const string& ip, const uint16_t& port, sockaddr_in& addr)
 {
     int ret = 0;
@@ -44,6 +49,19 @@ int SocketUtil::IpPortToSocketAddr(const string& ip, const uint16_t& port, socka
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = net;
     addr.sin_port = htons(port);
+
+    return 0;
+}
+
+int SocketUtil::InAddrToIp(const in_addr& in, string& ip)
+{
+    uint32_t net = in.s_addr;
+    int ret = IpNetToStr(net, ip);
+
+    if (ret < 0)
+    {
+        return -1;
+    }
 
     return 0;
 }

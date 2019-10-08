@@ -1,3 +1,5 @@
+#include <sys/syscall.h>
+
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -50,6 +52,18 @@ extern "C"
 __thread bool g_init = false;
 __thread CoroutineContext* g_ctx_stack[64] = { 0 };
 __thread int g_ctx_stack_top = 0;
+__thread CID g_cid = 0;
+__thread uint64_t g_tid = 0;
+
+uint64_t get_tid()
+{
+    if (g_tid == 0)
+    {
+        g_tid = (uint64_t)syscall(SYS_gettid);
+    }
+
+    return g_tid;
+}
 
 static void CoroutineEntry(void* args)
 {
@@ -82,6 +96,11 @@ CoroutineContext* get_cur_ctx()
     return CUR_CTX;
 }
 
+CID get_cid()
+{
+    return CUR_CTX->cid_;
+}
+
 CoroutineContext* CreateCoroutine(const std::string& name, RoutineFunc routine_func, void* args, const int& stack_size)
 {
     if (! g_init)
@@ -99,6 +118,9 @@ CoroutineContext* CreateCoroutine(const std::string& name, RoutineFunc routine_f
     ctx->stack_size_ = AdjustStackSize(stack_size);
     ctx->stack_ = (uint8_t*)malloc(ctx->stack_size_);
     ctx->name_ = name;
+    ctx->cid_ = get_tid() << 32 | g_cid++;
+
+    LogDebug << "tid=" <<get_tid() << std::endl;
 
     void* point_this = ctx->stack_;
     *((void**)point_this) = (void*)(ctx);

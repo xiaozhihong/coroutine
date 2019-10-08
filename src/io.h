@@ -14,6 +14,7 @@ int Read(const int& fd, uint8_t* data, const int& size);
 int Write(const int& fd, const uint8_t* data, const int& size);
 int ReadGivenSize(const int& fd, uint8_t* data, const int& size);
 int WriteGivenSize(const int& fd, const uint8_t* data, const int& size);
+int GetHostByName(const std::string& host, std::string& ip);
 
 void SleepMs(const int& ms);
 
