@@ -16,61 +16,34 @@ Epoller::~Epoller()
     close(epoller_fd_);
 }
 
-int Epoller::Add(const int& fd, const uint32_t& events, void* args)
+int Epoller::EnableRead(const int& fd, void* args)
 {
-    uint32_t ev = 0;
-    int fd_exist = GetFd(fd, ev);
-    if (fd_exist > 0 && ev == events)
-    {
-        LogDebug << LOG_PREFIX << "fd=" << fd << ",events=" << events << " no change, ignore" << std::endl;
-        return 0;
-    }
-
-	struct epoll_event event;
-    event.events = events;
-    event.data.ptr = (void*)args;
-
-    int op = EPOLL_CTL_ADD;
-    if (fd_exist)
-    {
-        op = EPOLL_CTL_MOD;
-    }
-
-    int ret = epoll_ctl(epoller_fd_, op, fd, &event);
-    if (ret < 0)
-    {
-        LogDebug << PrintErr("epoll_ctl", errno) << std::endl;
-    }
-    else
-    {
-        if (fd_exist)
-        {
-            ModFd(fd, events);
-        }
-        else
-        {
-            AddFd(fd, events);
-        }
-    }
-
-    return ret;
+    return EnableEvent(fd, EPOLLIN, args);
 }
 
-int Epoller::Del(const int& fd)
+int Epoller::EnableWrite(const int& fd, void* args)
 {
-	struct epoll_event event;
+    return EnableEvent(fd, EPOLLOUT, args);
+}
 
-    int ret = epoll_ctl(epoller_fd_, EPOLL_CTL_DEL, fd, &event);
-    if (ret < 0)
-    {
-        LogDebug << PrintErr("epoll_ctl", errno) << std::endl;
-    }
-    else
-    {
-        DelFd(fd);
-    }
+int Epoller::EnableAll(const int& fd, void* args)
+{
+    return EnableEvent(fd, EPOLLIN | EPOLLOUT, args);
+}
 
-    return ret;
+int Epoller::DisableRead(const int& fd)
+{
+    return DisableEvent(fd, EPOLLIN);
+}
+
+int Epoller::DisableWrite(const int& fd)
+{
+    return DisableEvent(fd, EPOLLOUT);
+}
+
+int Epoller::DisableAll(const int& fd)
+{
+    return DisableEvent(fd, EPOLLIN | EPOLLOUT);
 }
 
 void Epoller::Wait(const int& ms, std::vector<void*>& active, std::vector<void*>& timeout)
@@ -106,37 +79,75 @@ void Epoller::Wait(const int& ms, std::vector<void*>& active, std::vector<void*>
 #endif
 }
 
-int Epoller::GetFd(const int& fd, uint32_t& events)
+int Epoller::EnableEvent(const int& fd, const uint32_t& event, void* args)
 {
-    auto iter = fd_events_.find(fd);
-
-    if (iter == fd_events_.end())
+    if (event== 0)
     {
         return 0;
     }
 
-    events = iter->second;
+    uint32_t& fd_event = fd_events_[fd];
 
-    return 1;
+    if (fd_event & event == event)
+    {
+        LogDebug << LOG_PREFIX << "fd=" << fd << ", fd_event=" << fd_event << ", event=" << event << ", no changed" << std::endl;
+        return 0;
+    }
+
+    int op = (fd_event != 0) ? EPOLL_CTL_MOD : EPOLL_CTL_ADD;
+    fd_event |= event;
+
+    LogDebug << LOG_PREFIX << "fd=" << fd << ", fd_event=" << fd_event << std::endl;
+
+	struct epoll_event ep_ev;
+    ep_ev.events = fd_event;
+    ep_ev.data.ptr = (void*)args;
+
+    int ret = epoll_ctl(epoller_fd_, op, fd, &ep_ev);
+    if (ret < 0)
+    {
+        LogDebug << PrintErr("epoll_ctl", errno) << std::endl;
+    }
+
+    return ret;
 }
 
-void Epoller::AddFd(const int& fd, const uint32_t& events)
+int Epoller::DisableEvent(const int& fd, const uint32_t& event)
 {
-    LogDebug << LOG_PREFIX << "fd=" << fd << ",events=" << events << std::endl;
-    fd_events_[fd] = events;
+    if (event== 0)
+    {
+        return 0;
+    }
+
+    uint32_t& fd_event = fd_events_[fd];
+
+    if (fd_event & event == 0)
+    {
+        LogDebug << LOG_PREFIX << "fd=" << fd << ", fd_event=" << fd_event << ", event=" << event << ", fd no such event" << std::endl;
+        return 0;
+    }
+
+    fd_event &= ~event;
+    int op = (fd_event != 0) ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
+
+	struct epoll_event ep_ev;
+    ep_ev.events = fd_event;
+
+    int ret = epoll_ctl(epoller_fd_, op, fd, &ep_ev);
+    if (ret < 0)
+    {
+        LogDebug << PrintErr("epoll_ctl", errno) << std::endl;
+    }
+
+    if (fd_event == 0)
+    {
+        LogDebug << LOG_PREFIX << "fd=" << fd << ", no event now, delete it" << std::endl;
+        fd_events_.erase(fd);
+    }
+
+    return ret;
 }
 
-void Epoller::ModFd(const int& fd, const uint32_t& events)
-{
-    LogDebug << LOG_PREFIX << "fd=" << fd << ",events=" << events << std::endl;
-    fd_events_[fd] = events;
-}
-
-void Epoller::DelFd(const int& fd)
-{
-    LogDebug << LOG_PREFIX << "fd=" << fd << std::endl;
-    fd_events_.erase(fd);
-}
 
 void Epoller::TimeoutAt(void* args, const uint64_t& ms)
 {

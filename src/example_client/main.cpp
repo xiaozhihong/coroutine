@@ -98,7 +98,7 @@ void SendCoroutine(void* args)
         close(file_fd);
     }
 
-    get_epoller()->Del(fd);
+    get_epoller()->DisableAll(fd);
 }
 
 int main(int argc, char* argv[], char* env[])

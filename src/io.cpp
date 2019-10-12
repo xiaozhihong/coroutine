@@ -89,10 +89,11 @@ int Connect(const int& fd, const std::string& ip, const uint16_t& port)
     {
         if (errno == EINPROGRESS)
         {
-            get_epoller()->Add(fd, EPOLLOUT, get_cur_ctx());
+            get_epoller()->EnableWrite(fd, get_cur_ctx());
             LogDebug << LOG_PREFIX << "cid=" << get_cid() << " connect yield" << std::endl;
             Yield();
-            get_epoller()->Add(fd, EPOLLIN, get_cur_ctx());
+            get_epoller()->DisableWrite(fd);
+            get_epoller()->EnableRead(fd, get_cur_ctx());
             LogDebug << LOG_PREFIX << "cid=" << get_cid() << " connect resume" << std::endl;
         }
     }
@@ -127,9 +128,10 @@ int Read(const int& fd, uint8_t* data, const int& size)
         {
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
             {
-                LogDebug << LOG_PREFIX << " read yield" << std::endl;
+                LogDebug << LOG_PREFIX << " read yield, cid=" << get_cid() << std::endl;
+                get_epoller()->EnableRead(fd, get_cur_ctx());
                 Yield();
-                LogDebug << LOG_PREFIX << " read resume" << std::endl;
+                LogDebug << LOG_PREFIX << " read resume, cid=" << get_cid() << std::endl;
             }
             else
             {
@@ -158,7 +160,9 @@ int Write(const int& fd, const uint8_t* data, const int& size)
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
             {
                 LogDebug << LOG_PREFIX << " write yield" << std::endl;
+                get_epoller()->EnableWrite(fd, get_cur_ctx());
                 Yield();
+                get_epoller()->DisableWrite(fd);
                 LogDebug << LOG_PREFIX << " write resume" << std::endl;
             }
             else
@@ -194,7 +198,6 @@ int ReadGivenSize(const int& fd, uint8_t* data, const int& size)
 int WriteGivenSize(const int& fd, const uint8_t* data, const int& size)
 {
     int nbytes = 0;
-    get_epoller()->Add(fd, EPOLLOUT, get_cur_ctx());
     while (nbytes != size)
     {
         int ret = Write(fd, data, size);
@@ -208,7 +211,6 @@ int WriteGivenSize(const int& fd, const uint8_t* data, const int& size)
             return ret;
         }
     }
-    get_epoller()->Add(fd, EPOLLIN, get_cur_ctx());
 
     return nbytes;
 }
@@ -250,7 +252,7 @@ int GetHostByName(const std::string& host, std::string& ip)
     for (int i = 0; i < rs->nscount; ++i)
     {
         sendto(fd, dns_query_buf, ret, 0, (struct sockaddr*)&(rs->nsaddr_list[i]), sizeof(struct sockaddr));
-        get_epoller()->Add(fd, EPOLLIN, get_cur_ctx());
+        get_epoller()->EnableRead(fd, get_cur_ctx());
 
         LogDebug << LOG_PREFIX << "cid=" << get_cid() << " query dns yield" << std::endl;
         Yield();
@@ -331,11 +333,13 @@ int GetHostByName(const std::string& host, std::string& ip)
 
             content += ret;
 
+            get_epoller()->DisableAll(fd);
 			return 0;
         }
-
-        get_epoller()->Del(fd);
     }
+
+    get_epoller()->DisableAll(fd);
+	return -1;
 }
 
 void SleepMs(const int& ms)

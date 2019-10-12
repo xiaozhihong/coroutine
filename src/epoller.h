@@ -13,8 +13,12 @@ public:
     Epoller();
     ~Epoller();
 
-    int Add(const int& fd, const uint32_t& events, void* args);
-    int Del(const int& fd);
+    int EnableRead(const int& fd, void* args);
+    int EnableWrite(const int& fd, void* args);
+    int EnableAll(const int& fd, void* args);
+    int DisableRead(const int& fd);
+    int DisableWrite(const int& fd);
+    int DisableAll(const int& fd);
 
     void TimeoutAt(void* args, const uint64_t& ms);
     void TimeoutAfter(void* args, const uint64_t& ms);
@@ -22,10 +26,8 @@ public:
     void Wait(const int& ms, std::vector<void*>& active, std::vector<void*>& timeout);
 
 private:
-    int GetFd(const int& fd, uint32_t& events);
-    void AddFd(const int& fd, const uint32_t& events);
-    void ModFd(const int& fd, const uint32_t& events);
-    void DelFd(const int& fd);
+    int EnableEvent(const int& fd, const uint32_t& event, void* args);
+    int DisableEvent(const int& fd, const uint32_t& event);
 
     void TakeTimeout(std::set<void*>& timeout);
 

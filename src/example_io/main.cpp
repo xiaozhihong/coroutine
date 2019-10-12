@@ -22,8 +22,6 @@ void EchoRoutine(void* args)
     int fd = (uint64_t)args;
     bool error = false;
 
-    get_epoller()->Add(fd, EPOLLIN, get_cur_ctx());
-
     while (! error)
     {
         uint8_t buf[1024];
@@ -55,7 +53,7 @@ void EchoRoutine(void* args)
         }
     }
     
-    get_epoller()->Del(fd);
+    get_epoller()->DisableAll(fd);
     LogDebug << "close fd=" << fd << endl;
     close(fd);
 }
@@ -70,7 +68,7 @@ void AcceptRoutine(void* args)
     SocketUtil::Bind(server_fd, "0.0.0.0", 8788);
     SocketUtil::Listen(server_fd);
 
-    get_epoller()->Add(server_fd, EPOLLIN, get_cur_ctx());
+    get_epoller()->EnableRead(server_fd, get_cur_ctx());
 
     string client_ip = "";
     uint16_t client_port = 0;
