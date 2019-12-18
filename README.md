@@ -24,3 +24,7 @@ make
 ## Example
 
 see src/example_*
+```
+cd src/example_*
+make
+```
