@@ -1,7 +1,7 @@
 # =========================================================
 INCLUDE_DIR    += -I.. -I./include/ -I./3rd/include
 
-LIB_DIR        += -lresolv
+LIB_DIR        += ../libcoroutine.a -lresolv
 # ==========================================================
 CC             = gcc
 CXX 		   = g++
@@ -12,8 +12,6 @@ CXXFLAGS       = $(GNU_FLAGS) -std=c++0x
 
 # ==========================================================
 SOURCES += $(wildcard ./*.cpp)
-SOURCES += $(wildcard ../*.cpp)
-SOURCES += $(wildcard ../*.S)
 OBJECTS += $(patsubst %.cpp,%.o, $(patsubst %.c,%.o, $(patsubst %.S,%.o, $(SOURCES))))
 # ==========================================================
 ALL_OBJECTS = $(OBJECTS)

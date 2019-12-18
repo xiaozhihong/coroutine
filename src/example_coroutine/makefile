@@ -1,19 +1,17 @@
 # =========================================================
 INCLUDE_DIR    += -I.. -I./include/ -I./3rd/include
 
-LIB_DIR        +=
+LIB_DIR        += ../libcoroutine.a -lresolv
 # ==========================================================
 CC             = gcc
 CXX 		   = g++
-USER_MACRO     = -DDEBUG
+USER_MACRO     = -DDEBUG_
 GNU_FLAGS      = -g -W -O1 -fstrict-aliasing  -fno-omit-frame-pointer $(USER_MACRO)
 CFLAGS         = $(GNU_FLAGS)
 CXXFLAGS       = $(GNU_FLAGS) -std=c++0x
 
 # ==========================================================
 SOURCES += $(wildcard ./*.cpp)
-SOURCES += $(wildcard ../*.cpp)
-SOURCES += $(wildcard ../*.S)
 OBJECTS += $(patsubst %.cpp,%.o, $(patsubst %.c,%.o, $(patsubst %.S,%.o, $(SOURCES))))
 # ==========================================================
 ALL_OBJECTS = $(OBJECTS)

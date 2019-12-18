@@ -19,7 +19,7 @@ ALL_OBJECTS = $(OBJECTS)
 # ==========================================================
 DEP_FILE += $(foreach obj, $(ALL_OBJECTS), $(dir $(obj)).$(basename $(notdir $(obj))).d)
 # ==========================================================
-TARGET = main
+TARGET = libcoroutine.a
 # ==========================================================
 
 all: $(TARGET)
@@ -46,7 +46,7 @@ all: $(TARGET)
 	$(CC) $(INCLUDE_DIR) $(CFLAGS) -o $@ -c $<
 
 $(TARGET): $(OBJECTS)
-	$(CXX) $(INCLUDE_DIR) $(CXXFLAGS) $(OBJECTS) $(LIB_DIR) -o $@
+	@(ar crv $(TARGET) $(OBJECTS))
 
 clean:
 	rm -f $(DEP_FILE) $(OBJECTS) $(TARGET) *.o

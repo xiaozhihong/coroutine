@@ -46,7 +46,7 @@ void TestYield(void* args)
     for (int i = 0; i != 10; ++i)
     {
         LogDebug << dec << "(" << i << ") ---> yield" << endl;
-        Yield(ctx);
+        Yield();
         LogDebug << dec << "(" << i << ") <--- resume" << endl;
         LogDebug << "param=" << param->dump() << endl;
     }
@@ -62,10 +62,6 @@ int main(int argc, char* argv[], char* env[])
         CoroutineContext* ctx = CreateCoroutine("TestYield", TestYield, param, 1335);
         Resume(ctx);
     }
-
-    LogDebug << __func__ << " # run schedule" << endl;
-
-    schedule_thread(NULL);    
 
     LogDebug << __func__ << " # main exit" << endl;
 
