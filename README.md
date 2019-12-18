@@ -5,7 +5,7 @@ coroutine learning
 ## Feature
 - [x] coroutine IO
 - [x] coroutine DNS
-- [] cross-platform
+- [ ] cross-platform
 
 
 ## Usage
